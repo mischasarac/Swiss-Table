@@ -24,3 +24,8 @@ TEST(swiss_map, constructor_test) {
     // Simple comparison of move being at least 1000x faster
     ASSERT_GT(time_elapsed_cpy / 1000, time_elapsed_move);
 }
+
+TEST(swiss_map, simple_at_function) {
+    mischa::swiss_map<int, int> sm;
+    ASSERT_THROW(sm.at(0), std::out_of_range);
+}

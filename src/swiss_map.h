@@ -4,6 +4,9 @@
 #include <vector>
 #include <algorithm>
 #include <functional>
+#include <immintrin.h>
+#include <cstdint>
+#include <stdexcept>
 
 namespace mischa {
 
@@ -43,12 +46,18 @@ private: // Struct definitions
 private: // Internal helper functions
 
     // Cache-related helpers
-    const size_t H1(size_t hash) const;    // Hash in slot of table
-    const ctrl_t H2(size_t hash) const; // Hash within the control (bitmask)
+    size_t H1(size_t hash) const;    // Hash in slot of table
+    ctrl_t H2(size_t hash) const; // Hash within the control (bitmask)
 
     double load_factor() const;
 
     void set_table_size(size_t n);
+
+    uint16_t match(size_t index, h2_t hash) const;
+
+    uint16_t match_empty(size_t index) const;
+
+    
 
 
 
@@ -62,6 +71,9 @@ public:
     swiss_map(swiss_map&&) = default;
 
     ~swiss_map() = default;
+
+    // Standard function
+    V& at(const K& key);
 
 };
 

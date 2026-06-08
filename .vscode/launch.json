@@ -8,8 +8,8 @@
       "args": [],
       "stopAtEntry": false,
       "externalConsole": false,
-      "cwd": "/home/mischa/BetterHashmap/testing",
-      "program": "/home/mischa/BetterHashmap/testing/build/Debug/outDebug",
+      "cwd": "/home/mischa/BetterHashmap/src",
+      "program": "/home/mischa/BetterHashmap/src/build/Debug/outDebug",
       "MIMode": "gdb",
       "miDebuggerPath": "gdb",
       "setupCommands": [
