@@ -48,10 +48,13 @@ private: // Internal helper functions
     double load_factor() const;
 
 
+
+
 public:
 
     // Default constructors and deconstructors
-    swiss_map() = default;
+    swiss_map();
+    swiss_map(size_t n);
     swiss_map(const swiss_map&) = default;
     swiss_map(swiss_map&&) = default;
 
@@ -61,6 +64,7 @@ public:
 
 }
 
+#include "swiss_map.tpp"
 
 
 #endif
