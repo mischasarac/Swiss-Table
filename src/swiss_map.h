@@ -19,11 +19,12 @@ template <
 >
 class swiss_map {
 private: // Member variables
-    size_t size_;
-    size_t bucketCount_;
+    size_t size_{};
+    size_t bucketCount_{};
+    float growth_factor{2.0};
 
-    std::vector<ctrl_t> ctrl_;
-    std::vector<std::pair<K, V>> table_;
+    std::vector<ctrl_t> ctrl_{};
+    std::vector<std::pair<K, V>> table_{};
 
     /*
     Swisse tables use 7-bits of the hash hash as a bitset for comparison within buckets.
@@ -47,11 +48,16 @@ private: // Internal helper functions
 
     double load_factor() const;
 
+    void set_table_size(size_t n);
+
+
+
 
 public:
 
     // Default constructors and deconstructors
-    swiss_map() = default;
+    swiss_map();
+    swiss_map(size_t n);
     swiss_map(const swiss_map&) = default;
     swiss_map(swiss_map&&) = default;
 
@@ -61,6 +67,7 @@ public:
 
 }
 
+#include "swiss_map.tpp"
 
 
 #endif
