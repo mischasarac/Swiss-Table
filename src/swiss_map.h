@@ -1,0 +1,66 @@
+#ifndef SWISS_MAP_H
+#define SWISS_MAP_H
+
+#include <vector>
+#include <algorithm>
+#include <functional>
+
+namespace mischa {
+
+// Predefine naming conventions
+
+using ctrl_t = int8_t;
+using h2_t = int8_t;
+
+template <
+    typename K,
+    typename V,
+    typename Hash = std::hash<K>
+>
+class swiss_map {
+private: // Member variables
+    size_t size_;
+    size_t bucketCount_;
+
+    std::vector<ctrl_t> ctrl_;
+    std::vector<std::pair<K, V>> table_;
+
+    /*
+    Swisse tables use 7-bits of the hash hash as a bitset for comparison within buckets.
+    */
+
+private: // Struct definitions
+
+    enum Ctrl : ctrl_t {
+        kEmpty = -128,      // 0b10000000 -- An empty table
+        kDeleted = -2,      // 0b11111110 -- Missing entry
+        kSentinel = -1,     // 0b11111111 -- Stop scanning table
+        // kFull =          // 0b0xxxxxxx
+    };
+
+
+private: // Internal helper functions
+
+    // Cache-related helpers
+    const size_t H1(size_t hash) const;    // Hash in slot of table
+    const ctrl_t H2(size_t hash) const; // Hash within the control (bitmask)
+
+    double load_factor() const;
+
+
+public:
+
+    // Default constructors and deconstructors
+    swiss_map() = default;
+    swiss_map(const swiss_map&) = default;
+    swiss_map(swiss_map&&) = default;
+
+    ~swiss_map() = default;
+
+};
+
+}
+
+
+
+#endif
