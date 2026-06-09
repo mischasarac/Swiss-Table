@@ -51,16 +51,15 @@ private: // Internal helper functions
 
     double load_factor() const;
 
-    void set_table_size(size_t n);
+    void expand();
 
     uint16_t match(size_t index, h2_t hash) const;
-
     uint16_t match_empty(size_t index) const;
+    uint16_t match_free_slot(size_t index) const;
 
+    size_t find_free_slot(const K& key);
+    void set_table_size(size_t n);
     
-
-
-
 
 public:
 
@@ -74,6 +73,8 @@ public:
 
     // Standard function
     V& at(const K& key);
+
+    V& insert(const K& key, const V& value);
 
 };
 
