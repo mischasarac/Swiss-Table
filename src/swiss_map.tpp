@@ -270,6 +270,24 @@ V& swiss_map<K, V, Hash>::insert(const K& key, const V& value) {
         
 } 
 
+template<typename K, typename V, typename Hash>
+V& swiss_map<K, V, Hash>::operator[](const K& key) {
+        if(this->bucketCount_ == this->size_)
+                this->expand();
+
+        try {
+                auto& result = this->at(key);
+                return result;
+        } catch(const std::out_of_range& e) { // Need to insert the value
+                size_t hash = Hash{}(key);
+                size_t index = this->find_free_slot(key);
+                this->ctrl_[index] = H2(hash);
+                this->table_[index] = std::make_pair(key, V());
+                this->bucketCount_++;
+                return this->table_[index].second;
+        }
+}
+
 
 }
 

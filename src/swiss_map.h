@@ -76,6 +76,8 @@ public:
 
     V& insert(const K& key, const V& value);
 
+    V& operator[](const K& key);
+
 };
 
 }
