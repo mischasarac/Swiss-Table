@@ -61,4 +61,9 @@ TEST(swiss_map, operator_square_brackets) {
 
     sm[1] = 3;
     ASSERT_EQ(sm.at(1), 3);
+
+    for(int i = 0; i < 17; i++)
+        sm[i] = (i << 1);
+    for(int i = 0; i < 17; i++) 
+        ASSERT_EQ(sm[i], (i << 1));
 }
