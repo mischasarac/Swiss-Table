@@ -20,4 +20,4 @@ This is what lead to the development of the swiss table. While a swiss table con
 
 As mentioned, the swiss table still uses open addressing to resolve the collisions, but it is based around concepts of bucketing. In order to boost the efficiency of collision handling, a swiss table uses a vector of control bits of 1-byte each. These control bytes are set to be the first 7 bits of an item's hash, with a leading bit to check if a slot is empty. In doing so, we can almost instantaneously search 8-16 consecutive slots of the table to massively reduce our search space to only locations with collisions in both the leading 57 bits of the hash, and the remaining 7 bits.
 
-Ultimately this is where the big optimisation comes from, allowing us to use bucketing techniques and bit manipulation to effectively 
+Ultimately this is where the big optimisation comes from, allowing us to use bucketing techniques and bit manipulation to efficiently find our key without too many complicated searches.
