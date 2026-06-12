@@ -137,3 +137,10 @@ TEST(swiss_map, test_erase_speed) {
     // Make sure my map is better.
     ASSERT_GT(time_elapsed_std, time_elapsed_swiss);
 }
+
+TEST(swiss_map, test_initializer_list) {
+    mischa::swiss_map<int, int> sm({{1, 2}, {2, 3}, {3, 4}});
+    ASSERT_EQ(sm.at(1), 2);
+    ASSERT_EQ(sm.at(2), 3);
+    ASSERT_EQ(sm.at(3), 4);
+}

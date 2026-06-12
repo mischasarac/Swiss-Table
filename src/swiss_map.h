@@ -7,6 +7,7 @@
 #include <immintrin.h>
 #include <cstdint>
 #include <stdexcept>
+#include <initializer_list>
 
 namespace mischa {
 
@@ -67,6 +68,7 @@ public:
     swiss_map(size_t n);
     swiss_map(const swiss_map&) = default;
     swiss_map(swiss_map&&) = default;
+    swiss_map(std::initializer_list<std::pair<K, V>> list);
 
     ~swiss_map() = default;
 
