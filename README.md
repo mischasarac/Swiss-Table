@@ -15,3 +15,11 @@ sudo apt-get install libgtest-dev
 brew install googletest
 ```
 
+## Benchmarking
+For benchmarking we compare our `mischa::swiss_map<K, V>` against the `std::unordered_map<K, V>`, `boost::unordered_map<K, V>`, and the implementation that this project is based off of `absl::flat_hash_map<K, V>`.
+
+This means we need to install the two external libraries of `boost` and `absl`. If you don't already have these installed, run the following commands in your terminal:
+```bash
+sudo apt-get install libboost-dev
+sudo apt-get install libabsl-dev
+```
