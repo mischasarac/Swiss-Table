@@ -130,6 +130,16 @@ swiss_map<K, V, Hash>::swiss_map(size_t n) {
 }
 
 template<typename K, typename V, typename Hash>
+swiss_map<K, V, Hash>::swiss_map(std::initializer_list<std::pair<K, V>> list) : swiss_map(list.size()) {
+        for(const auto& item : list) {
+                this->insert(
+                        item.first,
+                        item.second
+                );
+        }
+}
+
+template<typename K, typename V, typename Hash>
 V& swiss_map<K, V, Hash>::at(const K& key) {
         size_t hash = Hash{}(key);
         size_t h1 = this->H1(hash);
