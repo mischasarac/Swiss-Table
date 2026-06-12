@@ -83,3 +83,57 @@ TEST(swiss_map, operator_square_brackets) {
     ASSERT_GT(time_elapsed_std, time_elapsed_swiss);
     
 }
+
+TEST(swiss_map, test_erase) {
+    mischa::swiss_map<int, int> sm;
+
+    for(int i = 0; i < 200; i++)
+        sm.insert(i, i);
+    
+    ASSERT_EQ(sm[10], 10);
+
+    for(int i = 0; i < 100; i++)
+        sm.erase(i);
+    
+    ASSERT_THROW(sm.at(10), std::out_of_range);
+    ASSERT_EQ(sm.at(100), 100);
+    
+}
+
+TEST(swiss_map, test_erase_speed) {
+    mischa::swiss_map<int, int> sm;
+    std::unordered_map<int, int> um;
+
+    int size = 300'000;
+    std::vector<int> values(size);
+    for(size_t i = 0; i < size; i++) {
+        values[i] = rand();
+    }
+
+    for(int i = 0; i < size; i++) {
+        sm[values[i]] = (values[i]);
+    }
+    
+    
+    
+    const auto start_swiss = std::chrono::steady_clock::now();
+    for(int i = 0; i < size; i++) 
+        sm.erase(i);
+    const auto end_swiss = std::chrono::steady_clock::now();
+    const std::chrono::duration<double> time_elapsed_swiss = end_swiss - start_swiss;
+    // Unordered map
+    const auto start_std = std::chrono::steady_clock::now();
+
+    for(int i = 0; i < size; i++)
+        um[values[i]] = (values[i]);
+
+    for(int i = 0; i < size; i++) 
+        um.erase(i);
+
+    const auto end_std = std::chrono::steady_clock::now();
+    const std::chrono::duration<double> time_elapsed_std = end_std - start_std;
+
+
+    // Make sure my map is better.
+    ASSERT_GT(time_elapsed_std, time_elapsed_swiss);
+}
