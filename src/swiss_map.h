@@ -8,6 +8,9 @@
 #include <cstdint>
 #include <stdexcept>
 #include <initializer_list>
+#include <type_traits>
+#include <string>
+#include <concepts>
 
 namespace mischa {
 
@@ -16,11 +19,18 @@ namespace mischa {
 using ctrl_t = int8_t;
 using h2_t = int8_t;
 
+template<typename K, typename Hash>
+concept Hashable =
+    requires(Hash h, K k) {
+        { h(k) } -> std::convertible_to<std::size_t>;
+    };
+
 template <
     typename K,
     typename V,
     typename Hash = std::hash<K>
 >
+requires Hashable<K, Hash>
 class swiss_map {
 private: // Member variables
     size_t size_{};
