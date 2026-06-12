@@ -4,6 +4,7 @@
 Because writing it every time is a pain here it is for you to cpy paste:
 ```
 template<typename K, typename V, typename Hash>
+requires Hashable<K, Hash>
 type swiss_map<K, V, Hash>::your_function() {
         
 }
@@ -14,12 +15,15 @@ type swiss_map<K, V, Hash>::your_function() {
 namespace mischa {
 
 template<typename K, typename V, typename Hash>
+requires Hashable<K, Hash>
 size_t swiss_map<K, V, Hash>::H1(size_t hash) const { return hash >> 7; }
 
 template<typename K, typename V, typename Hash>
+requires Hashable<K, Hash>
 ctrl_t swiss_map<K, V, Hash>::H2(size_t hash) const { return static_cast<ctrl_t>(hash & 0x7F); }
 
 template<typename K, typename V, typename Hash>
+requires Hashable<K, Hash>
 void swiss_map<K, V, Hash>::set_table_size(size_t n) {
         this->ctrl_.assign(n + 16, Ctrl::kEmpty);
         this->table_.resize(n);
@@ -28,6 +32,7 @@ void swiss_map<K, V, Hash>::set_table_size(size_t n) {
 
 
 template<typename K, typename V, typename Hash>
+requires Hashable<K, Hash>
 uint16_t swiss_map<K, V, Hash>::match(size_t index, h2_t hash) const
 {
         __m128i target = _mm_set1_epi8(hash);
@@ -43,6 +48,7 @@ uint16_t swiss_map<K, V, Hash>::match(size_t index, h2_t hash) const
 
 
 template<typename K, typename V, typename Hash>
+requires Hashable<K, Hash>
 uint16_t swiss_map<K, V, Hash>::match_empty(size_t index) const {
         __m128i target = _mm_set1_epi8(Ctrl::kEmpty);
         // Get segment in array by offsetting memory by index and then casting to __m128i*
@@ -56,6 +62,7 @@ uint16_t swiss_map<K, V, Hash>::match_empty(size_t index) const {
 }
 
 template<typename K, typename V, typename Hash>
+requires Hashable<K, Hash>
 uint16_t swiss_map<K, V, Hash>::match_free_slot(size_t index) const
 {
         // Check for all 3 empty slot configurations
@@ -79,6 +86,7 @@ uint16_t swiss_map<K, V, Hash>::match_free_slot(size_t index) const
 
 
 template<typename K, typename V, typename Hash>
+requires Hashable<K, Hash>
 void swiss_map<K, V, Hash>::expand() {
         size_t old_size = this->size_;
         size_t new_size = static_cast<size_t>(old_size * this->growth_factor);
@@ -104,6 +112,7 @@ void swiss_map<K, V, Hash>::expand() {
 }
 
 template<typename K, typename V, typename Hash>
+requires Hashable<K, Hash>
 void swiss_map<K, V, Hash>::delete_at_index(size_t index) {
         this->ctrl_[index] = Ctrl::kDeleted;
         if(index < 16) 
@@ -118,18 +127,21 @@ void swiss_map<K, V, Hash>::delete_at_index(size_t index) {
 */
 
 template<typename K, typename V, typename Hash>
+requires Hashable<K, Hash>
 swiss_map<K, V, Hash>::swiss_map() {
         this->set_table_size(16);
         this->bucketCount_ = 0;
 }
 
 template<typename K, typename V, typename Hash>
+requires Hashable<K, Hash>
 swiss_map<K, V, Hash>::swiss_map(size_t n) {
         this->set_table_size(n < 16 ? 16 : n);
         this->bucketCount_ = 0;
 }
 
 template<typename K, typename V, typename Hash>
+requires Hashable<K, Hash>
 swiss_map<K, V, Hash>::swiss_map(std::initializer_list<std::pair<K, V>> list) : swiss_map(list.size()) {
         for(const auto& item : list) {
                 this->insert(
@@ -140,6 +152,7 @@ swiss_map<K, V, Hash>::swiss_map(std::initializer_list<std::pair<K, V>> list) : 
 }
 
 template<typename K, typename V, typename Hash>
+requires Hashable<K, Hash>
 V& swiss_map<K, V, Hash>::at(const K& key) {
         size_t hash = Hash{}(key);
         size_t h1 = this->H1(hash);
@@ -179,6 +192,7 @@ V& swiss_map<K, V, Hash>::at(const K& key) {
 
 
 template<typename K, typename V, typename Hash>
+requires Hashable<K, Hash>
 V& swiss_map<K, V, Hash>::insert(const K& key, const V& value) {
 
         // Guardrail: Force expansion at 87.5% load factor to guarantee empty slots exist
@@ -236,6 +250,7 @@ V& swiss_map<K, V, Hash>::insert(const K& key, const V& value) {
 } 
 
 template<typename K, typename V, typename Hash>
+requires Hashable<K, Hash>
 V& swiss_map<K, V, Hash>::operator[](const K& key) {
         
         // Guardrail: Force expansion at 87.5% load factor to guarantee empty slots exist
@@ -291,6 +306,7 @@ V& swiss_map<K, V, Hash>::operator[](const K& key) {
 }
 
 template <typename K, typename V, typename Hash>
+requires Hashable<K, Hash>
 void swiss_map<K, V, Hash>::erase(const K& key) {
         size_t hash = Hash{}(key);
         size_t h1 = H1(hash);
