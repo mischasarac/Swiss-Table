@@ -104,47 +104,6 @@ void swiss_map<K, V, Hash>::expand() {
 }
 
 
-template<typename K, typename V, typename Hash>
-size_t swiss_map<K, V, Hash>::find_free_slot(const K& key) {
-        size_t hash = Hash{}(key);
-        size_t h1 = this->H1(hash);
-        h2_t h2 = this->H2(hash);
-        
-        size_t table_index = h1 % this->size_;
-
-        size_t steps = 0;
-
-
-        // A much better iteration method.
-        while(steps < this->size_) {
-                uint16_t segment = this->match_free_slot(table_index);
-                size_t offset = 0;
-                // Bit shifting to avoid going through all 16 bits
-                uint8_t shift = __builtin_ctz(segment);
-
-                while(segment) {
-                        offset += shift;
-                        segment >>= shift;
-                        if((segment & 1) != 0)
-                                return (table_index + offset) % this->size_;
-                        
-                        segment &= (segment - 1);
-                        shift = __builtin_ctz(segment);
-                }
-
-                table_index = (table_index + 16) % this->size_;
-                steps += 16;
-        }
-
-        
-        
-        // If we've gone through the whole map and not found an empty slot expand and calculate the same thing.
-        this->expand();
-        return this->find_free_slot(key);
-
-        
-}
-
 /*
         Public Member Functions
 */

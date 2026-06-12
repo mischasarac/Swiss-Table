@@ -49,15 +49,12 @@ private: // Internal helper functions
     size_t H1(size_t hash) const;    // Hash in slot of table
     ctrl_t H2(size_t hash) const; // Hash within the control (bitmask)
 
-    double load_factor() const;
-
     void expand();
 
     uint16_t match(size_t index, h2_t hash) const;
     uint16_t match_empty(size_t index) const;
     uint16_t match_free_slot(size_t index) const;
 
-    size_t find_free_slot(const K& key);
     void set_table_size(size_t n);
     
 
