@@ -119,13 +119,17 @@ size_t swiss_map<K, V, Hash>::find_free_slot(const K& key) {
         while(steps < this->size_) {
                 uint16_t segment = this->match_free_slot(table_index);
                 size_t offset = 0;
-                
+                // Bit shifting to avoid going through all 16 bits
+                uint8_t shift = __builtin_ctz(segment);
 
                 while(segment) {
+                        offset += shift;
+                        segment >>= shift;
                         if((segment & 1) != 0)
                                 return (table_index + offset) % this->size_;
-                        offset++;
-                        segment >>= 1;
+                        
+                        segment &= (segment - 1);
+                        shift = __builtin_ctz(segment);
                 }
 
                 table_index = (table_index + 16) % this->size_;
@@ -202,49 +206,112 @@ V& swiss_map<K, V, Hash>::insert(const K& key, const V& value) {
         // Guardrail: Force expansion at 87.5% load factor to guarantee empty slots exist
         if (this->bucketCount_ >= this->size_ * 0.875)
                 this->expand();
-        
 
-        try {
-                auto& result = this->at(key);
-                result = value;
-                return result;
-        } catch(const std::out_of_range& e) { // Need to insert the value
-                size_t hash = Hash{}(key);
-                size_t index = this->find_free_slot(key);
-                this->ctrl_[index] = H2(hash);
-                // Mirroring for ability to find beyond table size range
-                if(index < 16) 
-                        this->ctrl_[this->size_ + index] = H2(hash);
+        // Better optimisation
+        size_t hash = Hash{}(key);
+        size_t h1 = H1(hash);
+        ctrl_t h2 = H2(hash);
+
+        size_t table_index = h1 % this->size_;
+        size_t steps = 0;
+
+        // All 1s
+        size_t first_free_slot = static_cast<size_t>(-1);
+
+        while(steps < this->size_) {
+                uint16_t matches = this->match(table_index, h2);
+                uint16_t free_slot = this->match_free_slot(table_index);
+
+                uint16_t matches_cpy = matches;
+
+                while(matches_cpy) {
+                        size_t offset = __builtin_ctz(matches_cpy);
+                        size_t raw_index = (table_index + offset) % this->size_;
+
+                        if(this->table_[raw_index].first == key) {
+                                this->table_[raw_index].second = value;
+                                return this->table_[raw_index].second;
+                        }
+
+                        matches_cpy &= (matches_cpy - 1);
+                }
+                // Store first empty slot we see
+                if(first_free_slot == static_cast<size_t>(-1) && free_slot != 0) 
+                        first_free_slot = (table_index + __builtin_ctz(free_slot)) % this->size_;
+                // I was silly before. If we see an empty slot just return right after doing our loop
+                if(this->match_empty(table_index) != 0)
+                        break;
                 
-
-                this->table_[index] = std::make_pair(key, value);
-                this->bucketCount_++;
-                return this->table_[index].second;
+                table_index = (table_index + 16) % this->size_;
+                steps += 16;
         }
+
+        // Exited without finding the slot. This means we should insert a new point
+
+        this->ctrl_[first_free_slot] = h2;
+        if(first_free_slot < 16)
+                this->ctrl_[first_free_slot + this->size_] = h2;
+        this->table_[first_free_slot] = std::make_pair(key, value);
+        this->bucketCount_++;
+        return this->table_[first_free_slot].second;
         
 } 
 
 template<typename K, typename V, typename Hash>
 V& swiss_map<K, V, Hash>::operator[](const K& key) {
+        
+        // Guardrail: Force expansion at 87.5% load factor to guarantee empty slots exist
         if (this->bucketCount_ >= this->size_ * 0.875)
                 this->expand();
 
-        try {
-                auto& result = this->at(key);
-                return result;
-        } catch(const std::out_of_range& e) { // Need to insert the value
-                size_t hash = Hash{}(key);
-                // std::cout << "Hash(" << key << ") = " << hash << "\n";
-                size_t index = this->find_free_slot(key);
-                this->ctrl_[index] = H2(hash);
+        // Better optimisation
+        size_t hash = Hash{}(key);
+        size_t h1 = H1(hash);
+        ctrl_t h2 = H2(hash);
 
-                if(index < 16) 
-                        this->ctrl_[this->size_ + index] = H2(hash);
 
-                this->table_[index] = std::make_pair(key, V());
-                this->bucketCount_++;
-                return this->table_[index].second;
+        size_t table_index = h1 % this->size_;
+        size_t steps = 0;
+
+        // All 1s
+        size_t first_free_slot = static_cast<size_t>(-1);
+
+
+        while(steps < this->size_) {
+                uint16_t matches = this->match(table_index, h2);
+                uint16_t free_slot = this->match_free_slot(table_index);
+
+                uint16_t matches_cpy = matches;
+
+                while(matches_cpy) {
+                        size_t offset = __builtin_ctz(matches_cpy);
+                        size_t raw_index = (table_index + offset) % this->size_;
+
+                        if(this->table_[raw_index].first == key) {
+                                return this->table_[raw_index].second;
+                        }
+
+                        matches_cpy &= (matches_cpy - 1);
+                }
+                // Store first empty slot we see
+                if(first_free_slot == static_cast<size_t>(-1) && free_slot != 0) 
+                        first_free_slot = (table_index + __builtin_ctz(free_slot)) % this->size_;
+                // I was silly before. If we see an empty slot just return right after doing our loop
+                if(this->match_empty(table_index) != 0)
+                        break;
+                
+                table_index = (table_index + 16) % this->size_;
+                steps += 16;
         }
+
+        // Exited without finding the slot. This means we should insert a new point
+
+        this->ctrl_[first_free_slot] = h2;
+        if(first_free_slot < 16)
+                this->ctrl_[first_free_slot + this->size_] = h2;
+        this->table_[first_free_slot] = std::make_pair(key, V());
+        this->bucketCount_++;
+        return this->table_[first_free_slot].second;
 }
 
 
