@@ -56,6 +56,8 @@ private: // Internal helper functions
     uint16_t match_free_slot(size_t index) const;
 
     void set_table_size(size_t n);
+
+    void delete_at_index(size_t index);
     
 
 public:
@@ -74,6 +76,8 @@ public:
     V& insert(const K& key, const V& value);
 
     V& operator[](const K& key);
+
+    void erase(const K& key);
 
 };
 

@@ -103,6 +103,15 @@ void swiss_map<K, V, Hash>::expand() {
         }
 }
 
+template<typename K, typename V, typename Hash>
+void swiss_map<K, V, Hash>::delete_at_index(size_t index) {
+        this->ctrl_[index] = Ctrl::kDeleted;
+        if(index < 16) 
+                this->ctrl_[index] = Ctrl::kDeleted;
+                // Don't actually have to delete at the table since we overwrite everything.
+        this->bucketCount_--;
+}
+
 
 /*
         Public Member Functions
@@ -240,17 +249,15 @@ V& swiss_map<K, V, Hash>::operator[](const K& key) {
                 uint16_t matches = this->match(table_index, h2);
                 uint16_t free_slot = this->match_free_slot(table_index);
 
-                uint16_t matches_cpy = matches;
-
-                while(matches_cpy) {
-                        size_t offset = __builtin_ctz(matches_cpy);
+                while(matches) {
+                        size_t offset = __builtin_ctz(matches);
                         size_t raw_index = (table_index + offset) % this->size_;
 
                         if(this->table_[raw_index].first == key) {
                                 return this->table_[raw_index].second;
                         }
 
-                        matches_cpy &= (matches_cpy - 1);
+                        matches &= (matches - 1);
                 }
                 // Store first empty slot we see
                 if(first_free_slot == static_cast<size_t>(-1) && free_slot != 0) 
@@ -271,6 +278,41 @@ V& swiss_map<K, V, Hash>::operator[](const K& key) {
         this->table_[first_free_slot] = std::make_pair(key, V());
         this->bucketCount_++;
         return this->table_[first_free_slot].second;
+}
+
+template <typename K, typename V, typename Hash>
+void swiss_map<K, V, Hash>::erase(const K& key) {
+        size_t hash = Hash{}(key);
+        size_t h1 = H1(hash);
+        ctrl_t h2 = H2(hash);
+
+
+        size_t table_index = h1 % this->size_;
+        size_t steps = 0;
+
+        while(steps < this->size_) {
+                uint16_t matches = this->match(table_index, h2);
+                uint16_t empty = this->match_empty(table_index);
+
+                while(matches) {
+                        size_t offset = __builtin_ctz(matches);
+                        size_t raw_index = (table_index + offset) % this->size_;
+
+                        if(this->table_[raw_index].first == key) {
+                                this->delete_at_index(raw_index);
+                                return; // Delete and return
+                        }
+                        
+                        matches &= (matches - 1);                        
+                }
+                
+                if(empty) // Value not found just return
+                        return;
+                
+                table_index = (table_index + 16) % this->size_;
+                steps += 16;
+
+        }
 }
 
 

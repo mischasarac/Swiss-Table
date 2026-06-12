@@ -83,3 +83,19 @@ TEST(swiss_map, operator_square_brackets) {
     ASSERT_GT(time_elapsed_std, time_elapsed_swiss);
     
 }
+
+TEST(swiss_map, test_erase) {
+    mischa::swiss_map<int, int> sm;
+
+    for(int i = 0; i < 200; i++)
+        sm.insert(i, i);
+    
+    ASSERT_EQ(sm[10], 10);
+
+    for(int i = 0; i < 100; i++)
+        sm.erase(i);
+    
+    ASSERT_THROW(sm.at(10), std::out_of_range);
+    ASSERT_EQ(sm.at(100), 100);
+    
+}
