@@ -91,6 +91,36 @@ public:
 
     void erase(const K& key);
 
+public:
+    struct Iterator {
+        using iterator_category = std::forward_iterator_tag;
+        using iterator_concept = std::forward_iterator_tag;
+
+        using value_type = std::pair<K, V>;
+        using difference_type = std::ptrdiff_t;
+        using pointer = value_type*;
+        using reference = value_type&;
+
+        // Functions
+        reference operator*() const;
+        pointer operator->() const;
+
+        Iterator& operator++();
+        Iterator operator++(int);
+
+        bool operator==(const Iterator&) const = default;
+        bool operator!=(const Iterator&) const = default;
+
+        // Constructor
+        Iterator(swiss_map* map, std::size_t index)
+        : map_(map), index_(index) {}
+
+    private:
+        swiss_map* map_;
+        size_t index_;
+
+    };
+
 };
 
 }

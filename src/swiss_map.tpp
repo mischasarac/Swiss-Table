@@ -342,5 +342,27 @@ void swiss_map<K, V, Hash>::erase(const K& key) {
 }
 
 
+
+/*
+================== ITERATOR FUNCTIONS ======================
+*/
+
+template<typename K, typename V, typename Hash>
+requires Hashable<K, Hash>
+typename swiss_map<K, V, Hash>::Iterator::reference
+swiss_map<K, V, Hash>::Iterator::operator*() const {
+        return this->map_->table_[this->index_];
+}
+
+template<typename K, typename V, typename Hash>
+requires Hashable<K, Hash>
+typename swiss_map<K, V, Hash>::Iterator::pointer
+swiss_map<K, V, Hash>::Iterator::operator->() const {
+        return &this->map_->table_[this->index_];
+}
+
+
+
+
 }
 
