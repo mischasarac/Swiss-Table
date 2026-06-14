@@ -32,9 +32,9 @@ template <
 >
 requires Hashable<K, Hash>
 class swiss_map {
-private: // Member variables
+    private: // Member variables
     size_t size_{};
-    size_t bucketCount_{};
+    size_t bucket_count_{};
     float growth_factor{2.0};
 
     std::vector<ctrl_t> ctrl_{};
@@ -54,6 +54,48 @@ private: // Struct definitions
     };
 
 
+public:
+/*
+==================== Iterators ====================
+*/
+
+    struct Iterator {
+        using iterator_category = std::forward_iterator_tag;
+        using iterator_concept = std::forward_iterator_tag;
+
+        using value_type = std::pair<K, V>;
+        using difference_type = std::ptrdiff_t;
+        using pointer = value_type*;
+        using reference = value_type&;
+
+        // Functions
+        reference operator*() const;
+        pointer operator->() const;
+
+        Iterator& operator++();
+        Iterator operator++(int);
+
+        bool operator==(const Iterator&) const = default;
+        bool operator!=(const Iterator&) const = default;
+
+        // Constructor
+        Iterator(swiss_map* map, std::size_t index)
+        : map_(map), index_(index) {}
+
+    private:
+        swiss_map* map_;
+        size_t index_;
+        friend class swiss_map;
+
+    };
+
+    Iterator begin();
+    Iterator end();
+
+    Iterator find(const K& key);
+
+
+
 private: // Internal helper functions
 
     // Cache-related helpers
@@ -62,13 +104,18 @@ private: // Internal helper functions
 
     void expand();
 
+    bool occupied(size_t index) const;
+
     uint16_t match(size_t index, h2_t hash) const;
     uint16_t match_empty(size_t index) const;
     uint16_t match_free_slot(size_t index) const;
 
     void set_table_size(size_t n);
 
-    void delete_at_index(size_t index);
+    Iterator delete_at_index(size_t index);
+
+    Iterator find_next_iterator(size_t index);
+    Iterator find_next_iterator(Iterator it);
     
 
 public:
@@ -89,7 +136,8 @@ public:
 
     V& operator[](const K& key);
 
-    void erase(const K& key);
+    Iterator erase(const K& key);
+    Iterator erase(Iterator it);
 
 };
 

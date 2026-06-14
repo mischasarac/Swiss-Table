@@ -50,7 +50,7 @@ TEST(swiss_map, operator_square_brackets) {
 
     int size = 1'000'000;
     std::vector<int> values(size);
-    for(size_t i = 0; i < size; i++) {
+    for(int i = 0; i < size; i++) {
         values[i] = rand();
     }
     
@@ -106,7 +106,7 @@ TEST(swiss_map, test_erase_speed) {
 
     int size = 300'000;
     std::vector<int> values(size);
-    for(size_t i = 0; i < size; i++) {
+    for(int i = 0; i < size; i++) {
         values[i] = rand();
     }
 
@@ -143,4 +143,40 @@ TEST(swiss_map, test_initializer_list) {
     ASSERT_EQ(sm.at(1), 2);
     ASSERT_EQ(sm.at(2), 3);
     ASSERT_EQ(sm.at(3), 4);
+}
+
+TEST(swiss_map, test_iterators) {
+    mischa::swiss_map<int, int> sm;
+
+    ASSERT_EQ(sm.begin(), sm.end()); // Empty array.
+    sm[1] = 1;
+    sm[2] = 2;
+    sm[3] = 3;
+
+    auto it = sm.begin();
+    ASSERT_EQ(it->second, 1);
+    it++;
+    ASSERT_EQ(it->second, 2);
+}
+
+TEST(swiss_map, test_iterator_find_and_erase) {
+    mischa::swiss_map<int, int> sm;
+
+    ASSERT_EQ(sm.begin(), sm.end()); // Empty array.
+    sm[1] = 1;
+    sm[2] = 2;
+    sm[4] = 4;
+    sm[6] = 6;
+
+    auto it = sm.find(2);
+    ASSERT_EQ(it->second, 2);
+
+    auto next_it = sm.erase(it);
+    ASSERT_THROW(sm.at(2), std::out_of_range);
+    ASSERT_EQ(next_it->first, 4);
+    next_it++;
+    ASSERT_EQ(next_it->first, 6);
+    next_it++;
+    ASSERT_EQ(next_it, sm.end());
+
 }
