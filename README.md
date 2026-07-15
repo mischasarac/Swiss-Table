@@ -1,4 +1,4 @@
-# Swisse Table
+# Swiss Table
 A swisse table is a fast, efficient, and cache-friendly hash table implementation in C++. It is designed to provide high performance for a wide range of applications, including those that require frequent insertions and deletions.
 
 More of a summary of the swiss map is available at [swiss_table.md](/docs/swiss_table.md).
